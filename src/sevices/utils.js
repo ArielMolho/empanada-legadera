@@ -1,6 +1,9 @@
 import { db, auth } from './firebase';
 import { collection, getDocs, doc, setDoc, Timestamp, query, where, deleteDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged,
+  signOut, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider
+} from "firebase/auth";
 
 export const getItems = async () => {
   const querySnapshot = await getDocs(collection(db, 'products'));
@@ -92,11 +95,24 @@ export const loginUser = async (loginEmail, loginPassword) => {
   return user
 };
 
+export const loginUserWithGoogle = async () => {
+  const user = await signInWithPopup(auth, new GoogleAuthProvider())
+    .catch(err => {
+      return err;
+    });
+  if (user.user) {
+    let token = ("Bearer " + user?.user?.accessToken);
+    sessionStorage.setItem("token", JSON.stringify(token));
+    sessionStorage.setItem("user", JSON.stringify(user?.user?.email));
+  }
+  return user;
+};
+
 export const resetPassword = async (userEmail) => {
   const user = await sendPasswordResetEmail(auth, userEmail)
-  .catch(err => {
-    return err;
-  });
+    .catch(err => {
+      return err;
+    });
   return user;
 };
 

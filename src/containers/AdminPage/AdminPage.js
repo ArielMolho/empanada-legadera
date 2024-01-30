@@ -4,6 +4,7 @@ import { Container, Table, ListGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "../OrderHistory/OrderHistory.css"
 import { DatePicker } from 'antd';
+import { WhatsAppOutlined } from '@ant-design/icons';
 import 'antd/dist/antd.min.css';
 import NotFound from '../NotFound/NotFound';
 import DeleteOrder from '../../components/DeleteOrder/DeleteOrder';
@@ -13,18 +14,18 @@ const { getOrdersByDate } = require('../../sevices/utils');
 export default function AdminPage() {
   const [orders, setOrders] = useState();
   const [orderSum, setOrderSum] = useState();
+  const [whatsAppMessage, setWhatsAppMessage] = useState();
   const [adminUser, setAdminUser] = useState(false);
   const options = { year: "numeric", month: "long", day: "numeric" };
 
-  function onChange(date, dateString) {
-    getOrdersByDate(dateString).then(res => {
-      console.log(res);
+  const onChange = async (date, dateString) => {
+    await getOrdersByDate(dateString).then(res => {
       setOrders(res);
       summary(res);
     })
-  }
+  };
 
-  function summary(res) {
+  const summary = (res) => {
     let orderSummary = [];
     for (let i = 0; i < res.length; i++) {
       for (let j = 0; j < res[i].items.length; j++) {
@@ -40,6 +41,17 @@ export default function AdminPage() {
       }
     }
     setOrderSum(orderSummary);
+
+    let messageIntro = "https://api.whatsapp.com/send/?phone=5491135637041&text=Hola%2C%20quiero%20hacer%20un%20pedido%20de%20empanadas%3A%0A"
+    let messageBody = "";
+    orderSummary?.map((order) => {
+      return messageBody = messageBody + `${order.nombre.replaceAll(' ', '')}%20x${order.cantidad}%0A`
+    })
+    const sum = orderSummary.reduce((accumulator, object) => {
+      return accumulator + object.cantidad;
+    }, 0);
+    let messageTotal = `Total%3A%20${sum}`
+    setWhatsAppMessage(messageIntro + messageBody + messageTotal)
   }
 
   useEffect(() => {
@@ -73,7 +85,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.length > 0 ?
+                  {orders?.length > 0 ?
                     orders.map((order) => {
                       return (
                         <tr key={order.id}>
@@ -109,7 +121,7 @@ export default function AdminPage() {
             }
           </Container>
           <Container>
-            {orderSum &&
+            {orders?.length > 0 && orderSum &&
               <>
                 <div className='admin-date-container'>
                   <h6 className='admin-date-select'>Resumen de pedido:</h6>
@@ -126,6 +138,13 @@ export default function AdminPage() {
               </>
             }
           </Container>
+          {orders?.length > 0 && whatsAppMessage &&
+            <div className='social-media-container'>
+              <a href={whatsAppMessage} target="_blank" rel="noreferrer">
+                <WhatsAppOutlined style={{ color: "#25D366", fontSize: "3rem" }} />
+              </a>
+            </div>
+          }
         </Layout >
         :
         <NotFound />

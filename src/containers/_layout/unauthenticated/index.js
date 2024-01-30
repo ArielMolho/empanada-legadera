@@ -1,8 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../layout.css";
+
 export function UnauthenticatedLayout({ children }) {
   let navigate = useNavigate();
+  const [footerYear, setFooterYear] = useState();
+
+  useEffect(() => {
+    const d = new Date();
+    setFooterYear(d.getFullYear());
+  }, []);
 
   useEffect(() => {
     if (sessionStorage.getItem("token")) {
@@ -14,7 +21,7 @@ export function UnauthenticatedLayout({ children }) {
     <div>
       <div className="main-cont">{children}</div>
       <footer className="footer">
-        <p className="copyright">© Copyright 2022 AryApp - Todos los derechos reservados</p>
+        <p className="copyright">© Copyright {footerYear} AryApp - Todos los derechos reservados</p>
       </footer>
     </div>
   );

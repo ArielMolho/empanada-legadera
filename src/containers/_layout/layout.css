@@ -11,6 +11,10 @@
   margin-bottom: 0 !important;
   position: fixed;
   bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .copyright {
